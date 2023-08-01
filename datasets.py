@@ -169,3 +169,42 @@ class ClevrTex6(Dataset):
 
     def __len__(self):
         return self.num_files
+
+
+class CLEVR6(Dataset):
+    def __init__(
+        self,
+        data_dir: str = "data/CLEVR6",
+        img_size: int = 128,
+        crop_size: int = 192,
+        train: bool = True,
+    ):
+        super().__init__()
+
+        self.img_size = img_size
+        self.train = train
+        self.stage = "train" if train else "val"
+
+        self.image_dir = os.path.join(data_dir, "images", self.stage)
+
+        self.files = sorted(os.listdir(self.image_dir))
+        self.num_files = len(self.files)
+
+        self.transform = transforms.Compose([
+            transforms.CenterCrop(crop_size),
+            transforms.Resize((img_size, img_size)),
+        ])
+
+    def __getitem__(self, index):
+        image_filename = self.files[index]
+        img = (
+            read_image(os.path.join(self.image_dir, image_filename), ImageReadMode.RGB)
+            .float()
+            .div(255.0)
+        )
+        img = self.transform(img)
+
+        return img
+
+    def __len__(self):
+        return self.num_files
