@@ -34,6 +34,7 @@ import models_mae
 
 from engine_pretrain import train_one_epoch
 
+from datasets import *
 
 def get_args_parser():
     parser = argparse.ArgumentParser('MAE pre-training', add_help=False)
@@ -47,7 +48,9 @@ def get_args_parser():
     parser.add_argument('--model', default='mae_vit_large_patch16', type=str, metavar='MODEL',
                         help='Name of model to train')
 
-    parser.add_argument('--input_size', default=224, type=int,
+    parser.add_argument('--crop_size', default=192, type=int,
+                        help='images crop size')
+    parser.add_argument('--img_size', default=128, type=int,
                         help='images input size')
 
     parser.add_argument('--mask_ratio', default=0.75, type=float,
@@ -72,7 +75,7 @@ def get_args_parser():
                         help='epochs to warmup LR')
 
     # Dataset parameters
-    parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
+    parser.add_argument('--data_dir', default='/datasets01/imagenet_full_size/061417/', type=str,
                         help='dataset path')
 
     parser.add_argument('--output_dir', default='./output_dir',
@@ -119,14 +122,19 @@ def main(args):
 
     cudnn.benchmark = True
 
-    # simple augmentation
-    transform_train = transforms.Compose([
-            transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
-    dataset_train = datasets.ImageFolder(os.path.join(args.data_path, 'train'), transform=transform_train)
-    print(dataset_train)
+    # dataset_train = ClevrTex10(
+    #     data_dir=args.data_dir, 
+    #     img_size=args.img_size, 
+    #     crop_size=args.crop_size,
+    #     train=True,
+    # )
+
+    dataset_train = TETRO(
+        data_dir=args.data_dir, 
+        img_size=args.img_size, 
+        crop_size=args.crop_size,
+        train=True,
+    )
 
     if True:  # args.distributed:
         num_tasks = misc.get_world_size()
