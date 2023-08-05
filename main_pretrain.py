@@ -129,7 +129,14 @@ def main(args):
     #     train=True,
     # )
 
-    dataset_train = TETRO(
+    # dataset_train = TETRO(
+    #     data_dir=args.data_dir, 
+    #     img_size=args.img_size, 
+    #     crop_size=args.crop_size,
+    #     train=True,
+    # )
+
+    dataset_train = MOVi(
         data_dir=args.data_dir, 
         img_size=args.img_size, 
         crop_size=args.crop_size,
